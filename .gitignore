@@ -1,5 +1,6 @@
 secrets.rb
 cacert.pem
+config.yaml
 
 # Windows image file caches
 Thumbs.db

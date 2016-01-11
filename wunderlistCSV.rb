@@ -1,31 +1,66 @@
 # userfile = ARGV.join
 
 ENV['SSL_CERT_FILE'] = 'cacert.pem'
-# ENV["OAUTH_SECRET"]
 
-require 'yaml'
 require 'open-uri'
 require 'openssl'
 require 'json'
 require 'csv'
 require 'pp'
 require 'oauth2'
+require 'yaml'
 load 'wunderfunctions.rb'
-load 'secrets.rb'
+# load 'secrets.rb'
 
-config = YAML.load_file('secrets.yml')
-
-
+###### Basic Config Information #####
+config = YAML.load_file('config.yaml')
 client_url = 'https://a.wunderlist.com/api/vi'
 client_redirect_url = 'http://michaelburnley.com/wunderlistCSV'
-state = ('a'..'z').to_a.shuffle[0,12].join
+CLIENT_ID = config["CLIENT_ID"]
+CLIENT_SECRET = config["CLIENT_SECRET"]
+state = ('a'..'z').to_a.shuffle[0,12].join # Create Randomized State Variable
+###### End Basic Config Information #####
 
-def codeExists?
-	if()
+###### Authorization Code Check #####
+if config['code'].nil?
+
+	puts "Please open the following address in your browser and authorize WunderlistCSV:\nhttps://www.wunderlist.com/oauth/authorize?client_id=#{CLIENT_ID}&redirect_uri=#{client_redirect_url}&state=#{state}"
+	code = gets.chomp
+
+	##### Add info to YAML #####
+	config['code'] = "#{code}"
+	File.open('config.yml','a') do |h|
+		h.write config.to_yaml
+	end
 end
 
-puts "Please open the following address in your browser and authorize WunderlistCSV:\nhttps://www.wunderlist.com/oauth/authorize?client_id=#{CLIENT_ID}&redirect_uri=#{client_redirect_url}&state=#{state}"
-code = gets.chomp
+else
+	code = config['CODE']
+end
+###### End Authorization Code Check #####
+
+###### OAUTH2 Authorization #####
+client = OAuth2::Client.new(CLIENT_ID, CLIENT_SECRET, :token_url => '/oauth/access_token', :site =>'https://wunderlist.com')
+authorize_url = client.auth_code.authorize_url(:redirect_uri => client_redirect_url, :response_type => 'code', :state => "#{state}")
+TOKEN_REQUEST = client.auth_code.get_token(code, :redirect_uri => client_redirect_url)
+TOKEN_STRING = TOKEN_REQUEST.token
+###### End OAUTH2 Authorization #####
+
+lists = getLists()
+
+puts "which task list do you want"
+listname = gets.chomp
+selectedlist = lists.select {|x| x['title'] == listname}
+listid = selectedlist[0]['id']
+getTasks(listid)
+
+puts "Done!"
+
+###### Add info to YAML #####
+#config['code'] = "#{code}"
+#File.open('config.yml','a') do |h|
+#	h.write config.to_yaml
+#end
 
 
 ##### Add info to YAML #####
@@ -38,27 +73,15 @@ code = gets.chomp
 #
 
 # code = '7ba6b4df7309c8cdecd7'
-client = OAuth2::Client.new(CLIENT_ID, CLIENT_SECRET, :token_url => '/oauth/access_token', :site =>'https://wunderlist.com')
-authorize_url = client.auth_code.authorize_url(:redirect_uri => client_redirect_url, :response_type => 'code', :state => 'erwjlkajdfhjhakjhfda')
-TOKEN_REQUEST = client.auth_code.get_token(code, :redirect_uri => client_redirect_url)
-TOKEN_STRING = TOKEN_REQUEST.token
 
 ##### lists #####
 
-lists = getLists()
 # response = TOKEN_REQUEST.get('https://a.wunderlist.com/api/v1/lists', :headers => { "X-Access-Token" => "#{TOKEN_STRING}", "X-Client-ID" => "#{CLIENT_ID}" })
 # lists = JSON.parse(response.body)
 # lists.each {|x| puts x['title']}
 
 
 # Find list by first column
-
-
-puts "which task list do you want"
-listname = gets.chomp
-selectedlist = lists.select {|x| x['title'] == listname}
-listid = selectedlist[0]['id']
-getTasks(listid)
 
 # addTask(listid, selectedlist, duedate)
 
@@ -98,7 +121,5 @@ getTasks(listid)
 # CSV.foreach('customers.csv') do |row|
 #   puts row.inspect
 # end
-
-puts "Done!"
 
 # https://www.wunderlist.com/oauth/authorize?client_id=ID&redirect_uri=URL&state=RANDOM
