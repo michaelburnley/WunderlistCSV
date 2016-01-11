@@ -12,11 +12,8 @@ require 'oauth2'
 load 'wunderfunctions.rb'
 load 'secrets.rb'
 
-CLIENT_ID = "3b655b2c6c86ac7cf0a0"
-CLIENT_SECRET = "ca79b2e8b41b1bc3e24d8cfaa4857f8f10c19b799fe5f42bc62c7b13ddf9"
 client_url = 'https://a.wunderlist.com/api/vi'
 client_redirect_url = 'http://michaelburnley.com/wunderlistCSV'
-code = '7ba6b4df7309c8cdecd7'
 
 client = OAuth2::Client.new(CLIENT_ID, CLIENT_SECRET, :token_url => '/oauth/access_token', :site =>'https://wunderlist.com')
 authorize_url = client.auth_code.authorize_url(:redirect_uri => client_redirect_url, :response_type => 'code', :state => 'erwjlkajdfhjhakjhfda')
