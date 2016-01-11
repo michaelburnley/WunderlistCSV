@@ -9,33 +9,33 @@ require 'csv'
 require 'pp'
 require 'oauth2'
 require 'yaml'
+require 'launchy'
 load 'wunderfunctions.rb'
 # load 'secrets.rb'
 
 ###### Basic Config Information #####
 config = YAML.load_file('config.yaml')
 client_url = 'https://a.wunderlist.com/api/vi'
-client_redirect_url = 'http://michaelburnley.com/wunderlistCSV'
-CLIENT_ID = config["CLIENT_ID"]
-CLIENT_SECRET = config["CLIENT_SECRET"]
+client_redirect_url = 'http://michaelburnley.com/wunderlistCSV.htm'
+CLIENT_ID = config[:CLIENT_ID]
+CLIENT_SECRET = config[:CLIENT_SECRET]
 state = ('a'..'z').to_a.shuffle[0,12].join # Create Randomized State Variable
 ###### End Basic Config Information #####
 
 ###### Authorization Code Check #####
-if config['code'].nil?
+if config[:CODE].nil?
 
-	puts "Please open the following address in your browser and authorize WunderlistCSV:\nhttps://www.wunderlist.com/oauth/authorize?client_id=#{CLIENT_ID}&redirect_uri=#{client_redirect_url}&state=#{state}"
+	puts "Please open the following address in your browser and authorize WunderlistCSV:"
+	Launchy.open("https://www.wunderlist.com/oauth/authorize?client_id=#{CLIENT_ID}&redirect_uri=#{client_redirect_url}&state=#{state}")
 	code = gets.chomp
 
 	##### Add info to YAML #####
-	config['code'] = "#{code}"
-	File.open('config.yml','a') do |h|
+	config[:CODE] = "#{code}"
+	File.open('config.yaml','a') do |h|
 		h.write config.to_yaml
 	end
-end
-
 else
-	code = config['CODE']
+	code = config[:CODE]
 end
 ###### End Authorization Code Check #####
 
