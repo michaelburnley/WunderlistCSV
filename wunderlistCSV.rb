@@ -3,6 +3,7 @@
 ENV['SSL_CERT_FILE'] = 'cacert.pem'
 # ENV["OAUTH_SECRET"]
 
+require 'yaml'
 require 'open-uri'
 require 'openssl'
 require 'json'
@@ -12,9 +13,31 @@ require 'oauth2'
 load 'wunderfunctions.rb'
 load 'secrets.rb'
 
+config = YAML.load_file('secrets.yml')
+
+
 client_url = 'https://a.wunderlist.com/api/vi'
 client_redirect_url = 'http://michaelburnley.com/wunderlistCSV'
+state = ('a'..'z').to_a.shuffle[0,12].join
 
+def codeExists?
+	if()
+end
+
+puts "Please open the following address in your browser and authorize WunderlistCSV:\nhttps://www.wunderlist.com/oauth/authorize?client_id=#{CLIENT_ID}&redirect_uri=#{client_redirect_url}&state=#{state}"
+code = gets.chomp
+
+
+##### Add info to YAML #####
+# YAMLFILE = File.open("test.yaml", 'a')
+# YAMLFILE.puts("CODE = "#{code}"")
+# YAMLFILE.close
+
+##### Does CODE already exist? #####
+#
+#
+
+# code = '7ba6b4df7309c8cdecd7'
 client = OAuth2::Client.new(CLIENT_ID, CLIENT_SECRET, :token_url => '/oauth/access_token', :site =>'https://wunderlist.com')
 authorize_url = client.auth_code.authorize_url(:redirect_uri => client_redirect_url, :response_type => 'code', :state => 'erwjlkajdfhjhakjhfda')
 TOKEN_REQUEST = client.auth_code.get_token(code, :redirect_uri => client_redirect_url)
@@ -31,14 +54,13 @@ lists = getLists()
 # Find list by first column
 
 
-
 puts "which task list do you want"
 listname = gets.chomp
 selectedlist = lists.select {|x| x['title'] == listname}
 listid = selectedlist[0]['id']
 getTasks(listid)
 
-addTask(listid, title, duedate)
+# addTask(listid, selectedlist, duedate)
 
 # body = JSON.generate({ 'list_id' => listid, 'title' => "Hello, Wunderlist!", 'due_date' => "2016-01-08"})
 # puts body
