@@ -2,6 +2,7 @@
 
 ENV['SSL_CERT_FILE'] = 'cacert.pem'
 
+###### Required gems and files #####
 require 'open-uri'
 require 'openssl'
 require 'json'
@@ -11,7 +12,7 @@ require 'oauth2'
 require 'yaml'
 require 'launchy'
 load 'wunderfunctions.rb'
-# load 'secrets.rb'
+###### End Required gems and files #####
 
 ###### Basic Config Information #####
 config = YAML.load_file('config.yaml')
@@ -47,79 +48,7 @@ TOKEN_STRING = TOKEN_REQUEST.token
 ###### End OAUTH2 Authorization #####
 
 lists = getLists()
-
-puts "which task list do you want"
-listname = gets.chomp
-selectedlist = lists.select {|x| x['title'] == listname}
-listid = selectedlist[0]['id']
-getTasks(listid)
+wunderlistTasks = getCSV()
+uploadCSV(lists, wunderlistTasks)
 
 puts "Done!"
-
-###### Add info to YAML #####
-#config['code'] = "#{code}"
-#File.open('config.yml','a') do |h|
-#	h.write config.to_yaml
-#end
-
-
-##### Add info to YAML #####
-# YAMLFILE = File.open("test.yaml", 'a')
-# YAMLFILE.puts("CODE = "#{code}"")
-# YAMLFILE.close
-
-##### Does CODE already exist? #####
-#
-#
-
-# code = '7ba6b4df7309c8cdecd7'
-
-##### lists #####
-
-# response = TOKEN_REQUEST.get('https://a.wunderlist.com/api/v1/lists', :headers => { "X-Access-Token" => "#{TOKEN_STRING}", "X-Client-ID" => "#{CLIENT_ID}" })
-# lists = JSON.parse(response.body)
-# lists.each {|x| puts x['title']}
-
-
-# Find list by first column
-
-# addTask(listid, selectedlist, duedate)
-
-# body = JSON.generate({ 'list_id' => listid, 'title' => "Hello, Wunderlist!", 'due_date' => "2016-01-08"})
-# puts body
-# response = TOKEN_REQUEST.post('https://a.wunderlist.com/api/v1/tasks', :headers => { "X-Access-Token" => "#{TOKEN_STRING}", "X-Client-ID" => "#{CLIENT_ID}", "Content-Type" => "application/json" }, :params => {'list_id' => listid}, :body => "#{body}")
-
-#tasks = JSON.parse(response.body)
-
-# response = TOKEN_REQUEST.get('https://a.wunderlist.com/api/v1/tasks', :headers => { "X-Access-Token" => "#{TOKEN_STRING}", "X-Client-ID" => "#{CLIENT_ID}" }, :params => {'list_id' => listid})
-# tasks = JSON.parse(response.body)
-# tasks.each do |i|
-# 	puts i['title']
-# end
-
-# lists.each {|key, value| puts "#{key} => #{value}"}
-
-##### end lists #####
-
-#def getTasks(listid)
-#	response = TOKEN_REQUEST.get('https://a.wunderlist.com/api/v1/tasks', :headers => { "X-Access-Token" => "#{TOKEN_STRING}", "X-Client-ID" => "#{client_id}" }, :params => {'list_id' => listid})
-#	tasks = JSON.parse(response.body)
-#	tasks.each do |i|
-#		puts i['title']
-#	end
-#end
-
-
-
-
-
-# puts lists[230036412]
-
-# => '230036412'
-
-# csvFile = CSV.read(userfile)
-# CSV.foreach('customers.csv') do |row|
-#   puts row.inspect
-# end
-
-# https://www.wunderlist.com/oauth/authorize?client_id=ID&redirect_uri=URL&state=RANDOM
